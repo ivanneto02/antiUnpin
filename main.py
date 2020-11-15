@@ -1,4 +1,5 @@
 import os
+import logmaker
 
 from slack_bolt import App
 
@@ -13,14 +14,16 @@ app = App(
 @app.event("pin_removed")
 def handle_unpin(client, event, logger):
 	user = event["user"]
-	channel = event["channel_id"]
-	timestamp = event["item"]["message"]["ts"]
-
 	user_data = client.users_list()
 
 	for member in user_data["members"]:
 		if user == member["id"]:
 			if not member["is_admin"]:
+				message = event["item"]["message"]["text"]
+				name = member["name"]
+				channel = event["channel_id"]
+				timestamp = event["item"]["message"]["ts"]
+				logmaker.createLog(user, name, message)
 				result = client.pins_add(
 					channel=channel, timestamp=timestamp
 				)
@@ -32,14 +35,16 @@ def handle_unpin(client, event, logger):
 @app.event("pin_added")
 def handle_pin(client, event, logger):
 	user = event["user"]
-	channel = event["channel_id"]
-	timestamp = event["item"]["message"]["ts"]
-
 	user_data = client.users_list()
 	
 	for member in user_data["members"]:
 		if user == member["id"]:
 			if not member["is_admin"] and not member["is_bot"]:
+				message = event["item"]["message"]["text"]
+				name = member["name"]
+				channel = event["channel_id"]
+				timestamp = event["item"]["message"]["ts"]
+				logmaker.createLog(user, name, message)
 				result = client.pins_remove(
 					channel=channel, timestamp=timestamp
 				)
